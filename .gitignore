@@ -1,0 +1,11 @@
+# 模型权重（14GB，另行分发）
+models/
+# 嵌套克隆的原始仓库
+corpus/_src/
+# Python
+__pycache__/
+*.pyc
+# 运行日志（保留报告类产出）
+*.log
+# 临时
+/tmp/
