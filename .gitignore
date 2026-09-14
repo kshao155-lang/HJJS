@@ -9,3 +9,15 @@ __pycache__/
 *.log
 # 临时
 /tmp/
+# AIHub 工作台内部元数据（不入公共仓库）
+.control/
+.sessions/
+.chatlog/
+.last_turn/
+.last_turn.json
+.versions/
+.engine.err
+.quality_ledger.jsonl
+PROJECT_MASTER_CONTROL.md
+board.json
+project.json
