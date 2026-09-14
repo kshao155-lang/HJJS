@@ -104,7 +104,7 @@ def diversify(chunks, hits, k):
     return picked[:k]
 
 
-def answer(q, k=4, max_new=512, model=None, tok=None):
+def answer(q, k=6, max_new=512, model=None, tok=None):
     chunks, idx = load_or_build()
     hits = diversify(chunks, idx.search(q, k * 4), k)
     blocks = []
@@ -123,6 +123,12 @@ def answer(q, k=4, max_new=512, model=None, tok=None):
         boundary += ("\n\n## 工具缺答提示\n问题包含年份但历算工具未识别成功。"
                      "请明确声明「历算工具未能识别该年份，无法给出坐标」，"
                      "严禁自行推算元会运世。")
+    guas_in_q = find_gua(q)
+    if guas_in_q:
+        boundary += (f"\n\n## 卦卡强提示\n本问涉及卦：{'、'.join(guas_in_q)}。"
+                     "上方【规则计算·卦象】卡是该卦结构的唯一权威输出（上下卦、爻位、"
+                     "二进制值、先天序），涉及该卦结构的问题必须照录卦卡，"
+                     "严禁自行另组卦或采用《周易》通行卦序之外的说法。")
     user = (f"## 检索到的语料\n{ctx}\n\n## 确定性工具输出\n{tools}{boundary}\n\n## 问题\n{q}\n\n"
             "请按系统规则回答：标签标注、引用带出处、语料不足要明说。")
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
