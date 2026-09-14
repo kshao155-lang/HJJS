@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>观物工作台 · 皇极经世</title>
+<style>
+:root{--ink:#2b2b2b;--paper:#f7f4ec;--accent:#8b2e2e;--line:#d8d2c2;--dim:#7a7466;--jade:#3d6b52}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Source Han Serif SC","Noto Serif SC",SimSun,serif;line-height:1.7}
+header{border-bottom:3px double var(--ink);padding:14px 28px;display:flex;justify-content:space-between;align-items:baseline}
+header h1{font-size:22px;letter-spacing:6px}
+header small{color:var(--dim)}
+nav{display:flex;gap:4px;padding:10px 28px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{font:inherit;background:none;border:1px solid var(--line);border-bottom:none;padding:8px 20px;cursor:pointer;color:var(--dim)}
+nav button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+main{padding:22px 28px;max-width:1180px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+h2{font-size:17px;letter-spacing:3px;margin:18px 0 10px;border-left:4px solid var(--accent);padding-left:10px}
+input,select,textarea,button.act{font:inherit;padding:7px 10px;border:1px solid var(--line);background:#fff}
+button.act{cursor:pointer;background:var(--ink);color:var(--paper)}
+button.act.sec{background:none;color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.card{background:#fff;border:1px solid var(--line);padding:14px 18px;margin:10px 0}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border:1px solid var(--dim);color:var(--dim);margin-right:6px}
+.tag.原典{border-color:var(--jade);color:var(--jade)}
+.tag.规则{border-color:var(--accent);color:var(--accent)}
+.tag.批评{border-color:var(--accent)}
+.tag.托名{color:#999;border-color:#ccc}
+.mono{font-family:Consolas,monospace;font-size:14px}
+.small{font-size:13px;color:var(--dim)}
+.big{font-size:26px;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);cursor:pointer;font-size:15px}
+.cell:hover{background:var(--ink);color:var(--paper)}
+.cell b{font-size:11px;color:var(--dim)}
+.cell:hover b{color:var(--paper)}
+pre.quote{white-space:pre-wrap;background:#fff;border:1px solid var(--line);padding:12px}
+table{border-collapse:collapse;width:100%;background:#fff}
+td,th{border:1px solid var(--line);padding:6px 10px;font-size:14px;text-align:left}
+svg text{font-family:inherit}
+#guaDetail{position:sticky;top:10px}
+footer{margin-top:40px;border-top:1px solid var(--line);padding:14px 28px;color:var(--dim);font-size:13px}
+.md h1,.md h2,.md h3{margin:12px 0 6px}
+.md pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);padding:10px}
+</style>
+</head>
+<body>
+<header><h1>觀物工作台</h1><small>皇极经世 · 供观，不供占</small></header>
+<nav>
+ <button data-p="p1" class="on">经典研读台</button>
+ <button data-p="p2">元会运世时间轴</button>
+ <button data-p="p3">象数图谱</button>
+ <button data-p="p4">研究报告台</button>
+</nav>
+<main>
+
+<!-- ============ 页1 经典研读台 ============ -->
+<div class="page on" id="p1">
+ <h2>语料检索</h2>
+ <div class="row"><input id="q1" style="flex:1" placeholder="检索语料（简繁皆可），如：以物观物 / 元会运世 / 声音唱和">
+ <select id="k1"><option>6</option><option>10</option><option>15</option></select>
+ <button class="act" onclick="rag()">检索</button></div>
+ <div id="ragOut"></div>
+ <h2>语料浏览</h2>
+ <div class="row" style="align-items:flex-start">
+  <div style="width:340px" id="corpusTree" class="card mono small"></div>
+  <div style="flex:1" class="card"><pre class="quote mono" id="fileView">← 点选左侧文件阅读（限 corpus 目录）</pre></div>
+ </div>
+</div>
+
+<!-- ============ 页2 时间轴 ============ -->
+<div class="page" id="p2">
+ <h2>皇极历查询</h2>
+ <div class="row">
+  年份 <input id="y2" style="width:110px" value="2026">
+  <label><input type="radio" name="bc2" checked>公元</label>
+  <label><input type="radio" name="bc2">公元前</label>
+  <button class="act" onclick="lishuGo()">查询</button>
+  <span class="small">支持任意公元/公元前年份</span>
+ </div>
+ <div id="lishuOut"></div>
+ <h2>宇宙钟（当前元 129,600 年）</h2>
+ <div class="row"><svg id="clock" width="640" height="340" viewBox="0 0 640 340"></svg>
+ <div id="clockInfo" style="flex:1"></div></div>
+ <h2>逆运算（坐标 → 年份）</h2>
+ <div class="row">
+  会<input id="c_hui" type="number" min="1" max="12" value="7" style="width:60px">
+  运<input id="c_yun" type="number" min="1" max="30" value="13" style="width:60px">
+  世<input id="c_shi" type="number" min="1" max="12" value="3" style="width:60px">
+  年<input id="c_nian" type="number" min="1" max="30" value="3" style="width:60px">
+  <select id="c_scheme"><option>尧甲辰通行</option><option>赵友钦夏禹说</option></select>
+  <button class="act" onclick="coordGo()">换算</button><span id="coordOut" class="big"></span>
+ </div>
+ <p class="small" id="disclaimer2"></p>
+</div>
+
+<!-- ============ 页3 图谱 ============ -->
+<div class="page" id="p3">
+ <h2>先天方图（8×8 = 六十四卦，v 行优先）</h2>
+ <div class="row">
+  <div class="grid" id="fangTu" style="flex:1;max-width:520px"></div>
+  <div class="card" style="flex:1" id="guaDetail">← 点击任意卦查看结构卡</div>
+ </div>
+ <h2>先天圆图（复→乾 阳息，姤→坤 阴消）</h2>
+ <div class="row"><svg id="yuanTu" width="620" height="400" viewBox="0 0 620 400"></svg>
+ <div class="card" style="flex:1"><div id="yuanInfo" class="small">圆图 = 双向二进制计数器：复(32)→乾(63) 阳息半圆；姤(31)→坤(0) 阴消半圆。悬停查看，点击看结构卡。</div></div></div>
+ <h2>十二消息卦（二进制计数器进位点）</h2>
+ <div class="row" id="xiaoXi"></div>
+ <h2>声音唱和图（结构化与核验）</h2>
+ <div class="row"><button class="act sec" onclick="changhe()">载入唱和图数据</button></div>
+ <div id="changheOut"></div>
+</div>
+
+<!-- ============ 页4 报告台 ============ -->
+<div class="page" id="p4">
+ <h2>生成研究报告</h2>
+ <div class="row">
+  年份（可选）<input id="r_year" placeholder="如 2026 或 -2356" style="width:130px">
+  主题（可选）<input id="r_topic" placeholder="如 声音唱和 / 以物观物" style="flex:1">
+  <button class="act" onclick="report()">生成</button>
+  <button class="act sec" onclick="downloadMd()">下载 .md</button>
+ </div>
+ <div class="card" style="min-height:200px"><pre class="quote mono" id="r_out">生成内容 = 规则计算（引擎）+ 语料检索 + 四类标注框架。无预测。</pre></div>
+ <h2>AI 补充分析（本地模型，可选）</h2>
+ <div class="row"><input id="ai_q" style="flex:1" placeholder="向观物模型提问（首次加载约 1 分钟）">
+ <button class="act" onclick="askAI()">提问</button></div>
+ <div class="card"><pre class="quote" id="ai_out"></pre></div>
+</div>
+</main>
+<footer>观物工作台 · 皇极经世项目 · 历算 = 确定性引擎；引文 = 语料逐字；本界面输出供观，不供占。</footer>
+<script>
+let GUA=[];
+const $=id=>document.getElementById(id);
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+ b.classList.add("on");$(b.dataset.p).classList.add("on");});
+async function api(path){const r=await fetch(path);return r.json();}
+async function post(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json();}
+const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+/* ---- 页1 ---- */
+async function rag(){
+ $("ragOut").innerHTML="检索中…";
+ const items=await api(`/api/rag?q=${encodeURIComponent($("q1").value)}&k=${$("k1").value}`);
+ $("ragOut").innerHTML=items.map(it=>`<div class="card"><span class="tag ${it.label.includes("原典")?"原典":it.label.includes("规则")?"规则":it.label}">${it.label}</span><span class="small mono">${it.path}</span> <span class="small">score ${it.score}</span><pre class="quote">${esc(it.text)}</pre></div>`).join("");
+}
+async function loadTree(){
+ const items=await api("/api/corpus/list?path=");
+ $("corpusTree").innerHTML=items.map(it=>it.type==="dir"
+  ?`<div>📁 <a href="#" onclick="loadDir('${it.path}');return false">${it.name}</a></div>`
+  :`<div style="padding-left:14px">📄 <a href="#" onclick="loadFile('${it.path}');return false">${it.name}</a> <span class="small">${(it.size/1024).toFixed(0)}K</span></div>`).join("");
+}
+async function loadDir(p){const items=await api(`/api/corpus/list?path=${encodeURIComponent(p)}`);
+ $("corpusTree").innerHTML=`<div><a href="#" onclick="loadTree();return false">← 返回</a></div>`+items.map(it=>it.type==="dir"
+  ?`<div>📁 ${it.name}</div>`
+  :`<div style="padding-left:14px">📄 <a href="#" onclick="loadFile('${it.path}');return false">${it.name}</a></div>`).join("");}
+async function loadFile(p){
+ $("fileView").textContent="读取中…";
+ const r=await api(`/api/corpus/file?path=${encodeURIComponent(p)}`);
+ $("fileView").textContent=r.text?r.text.slice(0,20000):"(空)";}
+
+/* ---- 页2 ---- */
+function yearVal(){const v=parseInt($("y2").value);const bc=document.querySelector('input[name=bc2]:checked').textContent==="公元前";return bc? -(Math.abs(v)-1):v;}
+async function lishuGo(){
+ const y=yearVal();$("lishuOut").innerHTML="计算中…";
+ const c=await api(`/api/lishu/compare?year=${y}`);
+ const s=c.schemes, a=s["尧甲辰通行"], b=s["赵友钦夏禹说"];
+ $("lishuOut").innerHTML=`
+ <table><tr><th></th><th>尧甲辰通行</th><th>赵友钦夏禹说</th></tr>
+ <tr><td>公历</td><td>${a.label}（${a.ganzhi}年）</td><td>${b.label}（${b.ganzhi}年）</td></tr>
+ <tr><td>元历</td><td>第 ${a.pos} 年</td><td>第 ${b.pos} 年</td></tr>
+ <tr><td>会</td><td>${a.hui_branch}会（${a.hui_gua}卦）</td><td>${b.hui_branch}会（${b.hui_gua}卦）</td></tr>
+ <tr><td>运</td><td>第 ${a.yun_index} 运（${a.yun_gua.name}${a.yun_gua.char}）</td><td>第 ${b.yun_index} 运（${b.yun_gua.name}${b.yun_gua.char}）</td></tr>
+ <tr><td>世/年</td><td>第 ${a.shi_index} 世 第 ${a.nian_index} 年</td><td>第 ${b.shi_index} 世 第 ${b.nian_index} 年</td></tr></table>
+ <p class="small">两方案相差 ${Math.abs(c.pos_delta)} 年。读数必须连带起算方案。</p>`;
+ drawClock(a.pos);
+}
+const HUI=[["子","复","天开"],["丑","临","地辟"],["寅","泰","人生·开物"],["卯","大壮",""],["辰","夬",""],["巳","乾","阳极"],["午","姤","当前"],["未","遯",""],["申","否",""],["酉","观",""],["戌","剥","闭物"],["亥","坤","终始"]];
+function drawClock(pos){
+ const cx=320,cy=170,R=120;let svg=`<circle cx="${cx}" cy="${cy}" r="${R+18}" fill="none" stroke="#d8d2c2"/>`;
+ for(let i=0;i<12;i++){
+  const a0=-Math.PI/2+i*Math.PI/6,a1=a0+Math.PI/6;
+  const x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+  const xm=cx+R*Math.cos((a0+a1)/2),ym=cy+R*Math.sin((a0+a1)/2);
+  svg+=`<line x1="${cx}" y1="${cy}" x2="${x0}" y2="${y0}" stroke="#d8d2c2"/>`;
+  svg+=`<text x="${xm*1.06-cx+cx}" y="${ym*1.06-cy+cy}" text-anchor="middle" font-size="13">${HUI[i][0]}·${HUI[i][1]}</text>`;
+ }
+ const frac=(pos-1)/129600;const ang=-Math.PI/2+frac*2*Math.PI;
+ const px=cx+R*Math.cos(ang),py=cy+R*Math.sin(ang);
+ svg+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="rgba(139,46,46,.08)" stroke="#8b2e2e" stroke-width="0"/>`;
+ svg+=`<path d="M ${cx} ${cy} L ${cx} ${cy-R} A ${R} ${R} 0 ${frac>0.5?1:0} 1 ${px} ${py} Z" fill="rgba(139,46,46,.25)"/>`;
+ svg+=`<circle cx="${px}" cy="${py}" r="5" fill="#8b2e2e"/>`;
+ svg+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="15">${(frac*100).toFixed(1)}%</text>`;
+ $("clock").innerHTML=svg;
+ $("clockInfo").innerHTML=`<div class="big">第 ${pos} 年 / 129,600</div><p>当前元已行 ${((pos-1)/1296).toFixed(1)}%。天开于子，地辟于丑，人生于寅；既有消长，必有终始。</p>`;
+}
+async function coordGo(){
+ const r=await api(`/api/coordinate?hui=${$("c_hui").value}&yun=${$("c_yun").value}&shi=${$("c_shi").value}&nian=${$("c_nian").value}&scheme=${encodeURIComponent($("c_scheme").value)}`);
+ $("coordOut").textContent=`${r.label}（${r.ganzhi}年）`;}
+
+/* ---- 页3 ---- */
+function hexSVG(bits,size=34){
+ const w=size/2;let s=`<svg width="${w}" height="${size*0.55}" viewBox="0 0 100 110">`;
+ for(let i=0;i<6;i++){const y=5+i*18;const yang=bits[i]==="1";
+  s+=yang?`<rect x="10" y="${y}" width="80" height="12" fill="currentColor"/>`
+        :`<rect x="10" y="${y}" width="32" height="12" fill="currentColor"/><rect x="58" y="${y}" width="32" height="12" fill="currentColor"/>`;}
+ return s+"</svg>";}
+async function loadGua(){
+ GUA=await api("/api/gua/list");
+ $("fangTu").innerHTML=GUA.slice().sort((a,b)=>a.v-b.v).map(h=>
+  `<div class="cell" onclick="showGua('${h.name}')" title="${h.name} v=${h.v}">${h.char}<b>${h.v}</b></div>`).join("");
+ // 圆图：复32..乾63, 姤31..坤0
+ const order=[...Array(32)].map((_,i)=>63-i).concat([...Array(32)].map((_,i)=>31-i));
+ const cx=310,cy=200,R=150;
+ let svg=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#d8d2c2"/>`;
+ order.forEach((v,i)=>{
+  const a=-Math.PI/2+i*(2*Math.PI/64);
+  const x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);
+  const h=GUA.find(g=>g.v===v);
+  const col=h.yang>=4?"#8b2e2e":h.yang<=2?"#3d6b52":"#7a7466";
+  svg+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity="0.75" onclick="showGua('${h.name}')"><title>${h.name}${h.char} v=${v}</title></circle>`;
+  if([32,48,56,60,62,63,31,15,7,3,1,0].includes(v)){
+   const tx=cx+(R+28)*Math.cos(a),ty=cy+(R+28)*Math.sin(a);
+   svg+=`<text x="${tx}" y="${ty}" text-anchor="middle" font-size="12">${h.name}</text>`;}});
+ $("yuanTu").innerHTML=svg;
+ const xs=await api("/api/xiaoxi");
+ $("xiaoXi").innerHTML=xs.map(x=>`<div class="card" style="width:150px" title="${x.comment}"><b>${x.pos}. ${x.name}</b><div>${hexSVG(x.bits)}</div><span class="small">阳 ${x.yang}/6 · v=${parseInt(x.bits,2)}</span></div>`).join("");
+}
+async function showGua(name){
+ const g=await api(`/api/gua?name=${encodeURIComponent(name)}`);
+ const xs=await api("/api/xiaoxi");
+ const x=xs.find(x=>x.name===name);
+ $("guaDetail").innerHTML=`<div class="big">${g.name} ${g.char}</div>
+ <div style="color:var(--accent)">${hexSVG(g.bits,44)}</div>
+ <table><tr><td>上卦</td><td>${g.upper}</td><td>下卦</td><td>${g.lower}</td></tr>
+ <tr><td>v（初爻最高位）</td><td>${g.v}</td><td>先天序</td><td>${g.xiantian_index}</td></tr>
+ <tr><td>阳爻</td><td>${g.yang}/6</td><td>文王序</td><td>${g.kwn}</td></tr></table>
+ ${x?`<p class="small">十二消息卦第 ${x.pos} 位：${x.comment}</p>`:""}
+ <p class="small">莱布尼茨同构：v = 二进制（初爻为最高位），先天序 = 64 − v。</p>`;}
+async function changhe(){
+ $("changheOut").innerHTML="载入中…";
+ const d=await api("/api/changhe");
+ const blocks=(d.blocks||[]).filter(b=>b.parsed);
+ $("changheOut").innerHTML=`
+ <table><tr><th>篇</th><th>声组</th><th>调/闢翕</th><th>音组</th><th>開合/清浊</th><th>N(下)</th><th>M(上)</th><th>声注=N×152</th><th>音注=M×112</th></tr>
+ ${blocks.map(b=>`<tr><td>${b.pian.replace("觀物篇之","")}</td><td>${b.sheng}</td><td>${b.tiao}${b.pi}</td><td>${b.yin}</td><td>${b.kai}${b.zhuo}</td><td>${b.N}</td><td>${b.M}</td><td>${(b.N||0)*152} ${b.notes&&b.notes.includes((b.N||0)*152)?"✅":""}</td><td>${(b.M||0)*112} ${b.notes&&b.notes.includes((b.M||0)*112)?"✅":""}</td></tr>`).join("")}</table>
+ <p class="small">16 声组×7 行=112 · 16 音组×{9,12,5}=152 · 112×152=17,024（动数=植数）· 通数=17,024²=289,816,576 —— 全部经语料原文核验。</p>
+ <details><summary class="small">核验报告 v0 / v1 / 卦配实验</summary><pre class="quote mono small">${esc(d.summary_v0)}\n\n${esc(d.summary_v1)}\n\n${esc(d.gua_test)}</pre></details>`;}
+
+/* ---- 页4 ---- */
+let LASTMD="";
+async function report(){
+ $("r_out").textContent="生成中…";
+ const p=new URLSearchParams();
+ if($("r_year").value.trim())p.set("year",$("r_year").value.trim());
+ if($("r_topic").value.trim())p.set("topic",$("r_topic").value.trim());
+ const r=await fetch("/api/report?"+p.toString());
+ LASTMD=(await r.json()).markdown;
+ $("r_out").textContent=LASTMD;
+}
+function downloadMd(){
+ const b=new Blob([LASTMD],{type:"text/markdown"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="观物研究报告.md";a.click();}
+async function askAI(){
+ $("ai_out").textContent="加载/推理中（首次约 1 分钟，此后每次约 15 秒）…";
+ const r=await post("/api/ai",{q:$("ai_q").value});
+ $("ai_out").textContent=(r.answer||r.error||"")+"\n\n[检索] "+(r.refs||[]).join(" | ");
+}
+
+/* ---- 初始化 ---- */
+loadTree();loadGua();
+api("/api/lishu/compare?year=2026").then(c=>{drawClock(c.schemes["尧甲辰通行"].pos);});
+api("/api/meta").then(m=>{$("disclaimer2").textContent=m.disclaimer;});
+</script>
+</body>
+</html>

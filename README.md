@@ -180,6 +180,7 @@ python changhe.py && python m1_matrix.py && python m1_gua_test.py   # 唱和图�
 python rag.py 检索 以物观物             # 检索（简体查繁体原典）
 python guanwu.py / guanwu.py 对比 2026  # 观物 CLI / 双方案对照
 python guanwu_rag.py 问 "..."           # 满分问答（需本地 Qwen 权重）
+python serve.py                          # 观物工作台 UI → http://127.0.0.1:8899
 python eval_rag.py                      # 六维评测
 python sft_build.py                     # SFT 候选批次生成
 ```
