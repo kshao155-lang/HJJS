@@ -47,13 +47,13 @@ SYSTEM = """你是"观物"邵雍研究助手，工作在《皇极经世》研究
 
 
 def find_years(q):
-    """问题中出现的年份（含公元前）。"""
+    """问题中出现的年份（含公元前；1–4 位数均识别，历史年份常不足 4 位）。"""
     years = []
     for m in re.finditer(r"公元前\s*(\d{1,4})\s*年", q):
         years.append(-(int(m.group(1)) - 1))
-    for m in re.finditer(r"(?<![\d\-])(\d{4})\s*年", q):
+    for m in re.finditer(r"(?<![\d])(\d{1,4})\s*年", q):
         y = int(m.group(1))
-        if 1000 <= y <= 3000:
+        if 1 <= y <= 3000:
             years.append(y)
     return sorted(set(years))
 
@@ -119,6 +119,10 @@ def answer(q, k=4, max_new=512, model=None, tok=None):
                     "本系统不做任何预测。请按系统规则第 4 条作答：先声明不做预测，"
                     "再引'天下之数出于理，违乎理则入于术'，最后可说明本项目的实验负结果。"
                     "不得给出任何预测性、建议性结论（包括间接暗示）。")
+    if find_years(q) and "【规则计算·历算】" not in tools:
+        boundary += ("\n\n## 工具缺答提示\n问题包含年份但历算工具未识别成功。"
+                     "请明确声明「历算工具未能识别该年份，无法给出坐标」，"
+                     "严禁自行推算元会运世。")
     user = (f"## 检索到的语料\n{ctx}\n\n## 确定性工具输出\n{tools}{boundary}\n\n## 问题\n{q}\n\n"
             "请按系统规则回答：标签标注、引用带出处、语料不足要明说。")
     msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
