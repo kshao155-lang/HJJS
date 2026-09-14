@@ -152,6 +152,12 @@ def load_model():
     tok = AutoTokenizer.from_pretrained(MODEL_DIR)
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_DIR, dtype=torch.bfloat16, device_map="cuda:0")
+    # 若存在训练好的 LoRA 适配器则自动装载（盲评训练后模型）
+    adapter = os.path.join(ROOT, "models", "guanwu_lora")
+    if os.path.isdir(adapter) and os.path.exists(os.path.join(adapter, "adapter_config.json")):
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, adapter)
+        print(f"[已装载 LoRA 适配器：{adapter}]")
     model.eval()
     return model, tok
 
